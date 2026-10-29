@@ -32,6 +32,7 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 HP = 1
+KEEP_ABOVE = 1500          # 任务图里原本就比这更硬的目标：保留原值，别压成 1
 
 MODES = {
     'ra2': dict(
@@ -81,7 +82,12 @@ def backup_of(path: Path, bak_dir: Path) -> bool:
 
 
 def flatten(path: Path, keep: set) -> dict:
-    """把每个 Strength 覆盖压成 1（空格补齐保持等长）；keep 里的段落原样保留"""
+    """把每个 Strength 覆盖压成 1（空格补齐保持等长）
+
+    keep 里的段落原样保留；另外 **原本 > 1500 的一律保留原值** ——
+    那些是任务图特意做硬的目标（要占领的建造厂 30000、核电站 32000、导弹井 100000 …），
+    压成 1 会让任务直接没法打（例如盟军最后一关的苏军基地，一发流弹就没了，占领不了）。
+    """
     data = path.read_bytes()
     out = bytearray(data)
     res = dict(kept=[], set1=0, size=len(data))
@@ -89,7 +95,7 @@ def flatten(path: Path, keep: set) -> dict:
         secs = SEC_NAME.findall(data, 0, m.start())
         sec = secs[-1].decode('latin-1').strip() if secs else ''
         digits = m.group(3)
-        if sec.lower() in keep:
+        if sec.lower() in keep or int(digits) > KEEP_ABOVE:
             res['kept'].append(f'[{sec}]={digits.decode()}')
             continue
         if digits == b'1':
