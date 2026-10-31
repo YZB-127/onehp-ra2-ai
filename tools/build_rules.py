@@ -30,6 +30,7 @@ KEEP = {
     'gasand': 100, 'cafncb': 100, 'cafncw': 100,            # 沙袋 / 栅栏
     'cakrmw': 300, 'cafncp': 100,
     'veintree': 1000, 'ufo': 1000, 'cairfgl': 20,           # 装饰 / 占位
+    'catime01': 1000, 'catime02': 1000,                     # 时间机器（尤里苏军第一关的任务物件）
 }
 UNIT_HP, BUILDING_HP = 1, 2
 

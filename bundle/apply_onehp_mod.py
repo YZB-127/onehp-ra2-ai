@@ -64,7 +64,7 @@ MODES: dict[str, dict] = {
         backup='_onehpmd_backup',
         mixes=['mapsmd03.mix', 'multimd.mix', 'DeepFrze.yro', 'HighExpR.yro',
                'MonsterM.yro', 'Transylv.yro'],
-        keep={'gacnst', 'nacnst'},
+        keep={'gacnst', 'nacnst', 'catime01', 'catime02'},   # 末关建造厂 1500；时间机器保持任务原值
         final_map=dict(
             pack='mapsmd03.mix',
             mark=b'Brief:ALL07md',        # 盟军最后一关：要占领废弃苏军基地那关
