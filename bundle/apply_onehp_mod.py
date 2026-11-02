@@ -49,13 +49,10 @@ MODES: dict[str, dict] = {
         rules='rules.ini',
         backup='_onehp_backup',
         mixes=['maps01.mix', 'maps02.mix', 'MULTI.MIX', 'EB2.mmx', 'Hills.mmx'],
-        keep={'sapc', 'canewy04', 'gacnst'},
+        keep={'sapc', 'canewy04'},
         force=set(),
-        final_map=dict(
-            pack='maps01.mix',
-            mark=b'Brief:ALL12',          # 盟军最后一关：超时空风暴
-            block=b'[GACNST]\nStrength=1500\n',
-        ),
+        # 原版盟军最后一关（ALL12）的建造厂不再特殊照顾：跟其它建筑一样一滴血（2 血）
+        final_map=None,
         exe_patch=True,
     ),
     'yr': dict(
