@@ -50,6 +50,7 @@ MODES: dict[str, dict] = {
         backup='_onehp_backup',
         mixes=['maps01.mix', 'maps02.mix', 'MULTI.MIX', 'EB2.mmx', 'Hills.mmx'],
         keep={'sapc', 'canewy04', 'gacnst'},
+        force=set(),
         final_map=dict(
             pack='maps01.mix',
             mark=b'Brief:ALL12',          # 盟军最后一关：超时空风暴
@@ -65,6 +66,7 @@ MODES: dict[str, dict] = {
         mixes=['mapsmd03.mix', 'multimd.mix', 'DeepFrze.yro', 'HighExpR.yro',
                'MonsterM.yro', 'Transylv.yro'],
         keep={'gacnst', 'nacnst', 'catime01', 'catime02'},   # 末关建造厂 1500；时间机器保持任务原值
+        force={'catran03'},                                  # 尤里堡垒 TRANS FORTRESS：哪怕地图写 5000/2000 也压成一滴血
         final_map=dict(
             pack='mapsmd03.mix',
             mark=b'Brief:ALL07md',        # 盟军最后一关：要占领废弃苏军基地那关
@@ -114,8 +116,12 @@ def manifest_mode(bak: Path, rules_name: str) -> str | None:
 
 # ---------------------------------------------------------------- 地图改血量
 
-def flatten(path: Path, keep: set[str]) -> dict:
-    """把地图里的 Strength 覆盖压成 MAP_HP（空格补齐，保持文件等长）"""
+def flatten(path: Path, keep: set[str], force: set[str] = frozenset()) -> dict:
+    """把地图里的 Strength 覆盖压成 MAP_HP（空格补齐，保持文件等长）
+
+    keep：这些段落原样保留（任务脚本硬依赖，如时间机器、末关建造厂）
+    force：哪怕原值 > KEEP_ABOVE 也照样压下去（如尤里堡垒 TRANS FORTRESS，地图里写 5000）
+    """
     data = path.read_bytes()
     out = bytearray(data)
     res = dict(kept=[], changed=0, size=len(data))
@@ -124,7 +130,7 @@ def flatten(path: Path, keep: set[str]) -> dict:
         secs = SEC_NAME.findall(data, 0, m.start())
         sec = secs[-1].decode('latin-1').strip() if secs else ''
         digits = m.group(3)
-        if sec.lower() in keep or int(digits) > KEEP_ABOVE:
+        if sec.lower() in keep or (int(digits) > KEEP_ABOVE and sec.lower() not in force):
             res['kept'].append(f'[{sec}]={digits.decode()}')
             continue
         if digits == target:
@@ -277,7 +283,7 @@ def apply_mode(game: Path, mode: str) -> int:
             print(f'        {name:14s} 不存在，跳过')
             continue
         backup_of(p, bak)
-        res = flatten(p, cfg['keep'])
+        res = flatten(p, cfg['keep'], cfg.get('force') or frozenset())
         extra = f'   保留原值 {len(res["kept"])} 处: {", ".join(res["kept"])}' if res['kept'] else ''
         print(f'        {name:14s} 压成 {MAP_HP} {res["changed"]:3d} 处 ({res["size"]} 字节){extra}')
 
